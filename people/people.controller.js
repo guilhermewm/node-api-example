@@ -1,7 +1,6 @@
 var express = require('express');
 var peopleService = require('./people.service');
 var constants = require('./people.constants');
-var async = require('async');
 
 
 module.exports = {

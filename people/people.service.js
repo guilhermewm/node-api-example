@@ -1,7 +1,7 @@
 var People = require('./people.schema'),
-constants = require('./people.constants.json'),
-service = {},
-Q = require('q');
+    constants = require('./people.constants.json'),
+    service = {};
+
 
 service.registerPeople = registerPeople;
 service.getPeopleById = getPeopleById;

@@ -1,48 +1,45 @@
 var express = require('express'),
-    config   = require('./config'),
-    path = require('path'),
-    mongoose = require('mongoose'),
-    morgan = require('morgan'),
-    cors = require('cors'),
-    helmet = require('helmet'),
-    logger = require('mm-node-logger')(module),
-    bodyParser = require('body-parser'),
-    methodOverride = require('method-override'), //used to manipulate POST
+    config = require('./config'),
+    morgan = require('morgan'), // Permite logs das requisições
+    cors = require('cors'), // Permite Cross-origin resource sharing
+    helmet = require('helmet'), // Permite um pouco de segurança a aplicação
+    bodyParser = require('body-parser'), // Permite manipular mais facil as requisições
+    methodOverride = require('method-override'), // Permite utilizar PUT, DELETE, POST em lugares onde o cliente não os suportam.
 
-    app  = express(),
-    pathUtils      = require('../utils/path-utils');
+    app = express();
     const SixMonths = 15778476000;
 
 
     function initMiddleware(app) {
- // Showing stack errors
-    app.set('showStackError', true);
+        // Mostrando stack erros
+        app.set('showStackError', true);
 
-    // Enable jsonp
-    app.enable('jsonp callback');
-    if (config.environment === 'development') {
-        // Enable logger (morgan)
-        app.use(morgan('dev'));
+        // Permite jsonp
+        app.enable('jsonp callback');
+        if (config.environment === 'development') {
+            // Permite logger (morgan)
+            app.use(morgan('dev'));
 
-        // Disable views cache
-        app.set('view cache', false);
-    } else if (config.environment === 'production') {
-        app.locals.cache = 'memory';
+            // Desabilita views cache
+            app.set('view cache', false);
+        } else if (config.environment === 'production') {
+            app.locals.cache = 'memory';
+        }
+
+         // Algumas configurações do bodyParser
+        app.use(bodyParser.urlencoded({limit: '50mb', extended: true})); // Compreende urlencoded
+        app.use(bodyParser.json({ limit: '50mb' })); // Compreende json 
+        app.use(methodOverride());
+
+
     }
 
-     // Request body parsing middleware should be above methodOverride
-    app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
-    app.use(bodyParser.json({limit: '50mb'}));
-    app.use(methodOverride());
-
-
-}
 function initHelmetHeaders(app) {
-    app.use(helmet.frameguard());
-    app.use(helmet.xssFilter());
-    app.use(helmet.noSniff())
-    app.use(helmet.ieNoOpen());
-    app.use(helmet.hsts({
+    app.use(helmet.frameguard()); // Impede clickjacking
+    app.use(helmet.xssFilter());  // Adiciona algumas pequenas proteções XSS
+    app.use(helmet.noSniff());    // Impedir que os clients vejam os topos MINE
+    app.use(helmet.ieNoOpen());   // Seta as opções de X-Download para o IE8+
+    app.use(helmet.hsts({         // HTTP segurança de transporte estrito  
       "maxAge": SixMonths,
       "includeSubdomains": true,
       "force": true
@@ -60,32 +57,30 @@ function initCrossDomain(app) {
     });
 }
 
-function initGonfig(app) {
-    pathUtils.getGlobbedPaths(path.join(__dirname, '../**/*.config.js')).forEach(function (routePath) {
-        require(path.resolve(routePath))(app);
-    });
-}
 
+// Incia as rotas
 function initRoutes(app) {
    app.use('/api', require('./routes'));
 
 }
 
+// Inicia o BD 
 function initDB() {
     if(config.seedDB) {
         require('./seed');
     }
 }
 
+// Inicia todas as funções do arquivo
 function init() {
     var app = express();
     initMiddleware(app);
     initHelmetHeaders(app);
     initCrossDomain(app);
-    initGonfig(app);
     initRoutes(app);
     initDB();
     return app;
 }
 
+// Exporta as funções
 module.exports.init = init;

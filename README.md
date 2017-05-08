@@ -1,5 +1,16 @@
 # API node-api-example
 
+## Dependencias utilizadas
+
+- body-parser: https://github.com/expressjs/body-parser
+- cors: https://github.com/expressjs/cors
+- express: https://github.com/expressjs/express
+- method-override: https://github.com/expressjs/method-override
+- mm-node-logger: https://github.com/martinmicunda/mm-node-logger
+- mongoose: https://github.com/Automattic/mongoose
+- morgan: https://github.com/expressjs/morgan
+- nodemon: https://github.com/remy/nodemon
+
 ## Instalação
 
 - npm install
